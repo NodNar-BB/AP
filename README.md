@@ -1,1 +1,1 @@
-https://nodnar-bb.github.io/AP/
+https://nodnar-bb.github.io/AP
