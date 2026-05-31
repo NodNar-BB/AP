@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anatomy Mastery</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#1e1e1e;
+    color:white;
+}
+
+header{
+    background:#111;
+    padding:20px;
+}
+
+.container{
+    display:flex;
+    height:calc(100vh - 140px);
+}
+
+aside{
+    width:300px;
+    background:#252525;
+    padding:20px;
+    overflow-y:auto;
+}
+
+main{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+.structure{
+    background:#333;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.structure:hover{
+    background:#444;
+}
+
+.question-card{
+    background:#333;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    margin-bottom:10px;
+    border:none;
+    border-radius:5px;
+}
+
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.progress-container{
+    width:100%;
+    height:24px;
+    background:#444;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    width:0%;
+    background:limegreen;
+    transition:0.5s;
+}
+
+.feedback{
+    margin-top:10px;
+}
+
+.xp{
+    color:gold;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1>🧠 Anatomy Mastery</h1>
+
+<h3>Total XP:
+<span id="totalXP">0</span>
+</h3>
+
+<div class="progress-container">
+<div id="globalProgress" class="progress-fill"></div>
+</div>
+
+</header>
+
+<div class="container">
+
+<aside>
+
+<h2>Structures</h2>
+
+<div id="structureList"></div>
+
+</aside>
+
+<main>
+
+<h2 id="structureTitle">
+Select a Structure
+</h2>
+
+<div id="questionArea"></div>
+
+</main>
+
+</div>
+
+<script>
+
+/* ==========================
+   Anatomy Database
+========================== */
+
+const anatomyDatabase = {
+
+"Biceps Brachii": {
+
+questions:[
+
+{
+difficulty:"⭐",
+xp:10,
+question:"What compartment is this muscle located in?",
+answers:[
+"anterior compartment"
+]
+},
+
+{
+difficulty:"⭐⭐",
+xp:25,
+question:"What are the proximal attachments?",
+answers:[
+"supraglenoid tubercle",
+"coracoid process"
+]
+},
+
+{
+difficulty:"⭐⭐⭐",
+xp:50,
+question:"What nerve innervates this muscle?",
+answers:[
+"musculocutaneous nerve"
+]
+},
+
+{
+difficulty:"⭐⭐⭐⭐",
+xp:100,
+question:"What actions does this muscle perform?",
+answers:[
+"elbow flexion",
+"forearm supination"
+]
+}
+
+]
+
+},
+
+"Rectus Femoris": {
+
+questions:[
+
+{
+difficulty:"⭐",
+xp:10,
+question:"What compartment is this muscle located in?",
+answers:[
+"anterior compartment"
+]
+},
+
+{
+difficulty:"⭐⭐",
+xp:25,
+question:"What are the proximal attachments?",
+answers:[
+"anterior inferior iliac spine",
+"ilium"
+]
+},
+
+{
+difficulty:"⭐⭐⭐",
+xp:50,
+question:"What nerve innervates this muscle?",
+answers:[
+"femoral nerve"
+]
+},
+
+{
+difficulty:"⭐⭐⭐⭐",
+xp:100,
+question:"What actions does this muscle perform?",
+answers:[
+"knee extension",
+"hip flexion"
+]
+}
+
+]
+
+}
+
+};
+
+/* ==========================
+   Game Logic
+========================== */
+
+let totalXP = 0;
+
+const structureList =
+document.getElementById("structureList");
+
+const structureTitle =
+document.getElementById("structureTitle");
+
+const questionArea =
+document.getElementById("questionArea");
+
+function loadStructures(){
+
+for(const structure in anatomyDatabase){
+
+const div =
+document.createElement("div");
+
+div.className =
+"structure";
+
+div.innerText =
+structure;
+
+div.onclick =
+() => loadStructure(structure);
+
+structureList.appendChild(div);
+
+}
+
+}
+
+function loadStructure(structure){
+
+structureTitle.innerText =
+structure;
+
+questionArea.innerHTML = "";
+
+anatomyDatabase[structure]
+.questions
+.forEach(question => {
+
+const card =
+document.createElement("div");
+
+card.className =
+"question-card";
+
+card.innerHTML =
+
+`
+<h3>
+${question.difficulty}
+<span class="xp">
+(${question.xp} XP)
+</span>
+</h3>
+
+<p>${question.question}</p>
+
+<input type="text"
+placeholder="Type your answer here">
+
+<button>
+Submit
+</button>
+
+<div class="feedback"></div>
+`;
+
+const input =
+card.querySelector("input");
+
+const button =
+card.querySelector("button");
+
+const feedback =
+card.querySelector(".feedback");
+
+button.onclick = () => {
+
+const studentAnswer =
+input.value.toLowerCase();
+
+let matches = 0;
+
+question.answers.forEach(correct => {
+
+if(
+studentAnswer.includes(
+correct.toLowerCase()
+)
+){
+matches++;
+}
+
+});
+
+const score =
+matches /
+question.answers.length;
+
+const earnedXP =
+Math.round(
+score * question.xp
+);
+
+totalXP += earnedXP;
+
+document.getElementById(
+"totalXP"
+).innerText =
+totalXP;
+
+updateProgress();
+
+feedback.innerHTML =
+
+`
+Correctness:
+${Math.round(score*100)}%
+
+<br>
+
+XP Earned:
+${earnedXP}
+`;
+
+};
+
+questionArea.appendChild(card);
+
+});
+
+}
+
+function updateProgress(){
+
+const progress =
+Math.min(
+(totalXP/1000)*100,
+100
+);
+
+document.getElementById(
+"globalProgress"
+).style.width =
+progress + "%";
+
+}
+
+loadStructures();
+
+</script>
+
+</body>
+</html>
